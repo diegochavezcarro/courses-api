@@ -1,0 +1,101 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environment
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Pipenv
+# Only include if using Pipenv
+# Pipfile
+# Pipfile.lock
+
+# Poetry
+# Only include if using Poetry
+# poetry.lock
+# .venv/
+
+# Pyre type checker
+.pyre/
+
+# Test results
+coverage.xml
+.coverage
+*.cover
+.hypothesis/
+.pytest_cache/
+pytestdebug.log
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+# If using PyCharm, uncomment the following lines
+# .idea/
+
+# VS Code
+.vscode/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# SQLite database files
+*.db
+*.sqlite3
+
+# Static and media files
+static/
+media/
+
+# FastAPI specific
+instance/
+*.log
+
+# AWS CLI
+.aws/
+
+# Docker
+*.log
+docker-compose.override.yml
+Dockerfile
+
+# Environment variables
+.env
+.env.*
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
