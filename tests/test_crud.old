@@ -1,0 +1,90 @@
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.sql.elements import BinaryExpression
+from sqlalchemy.orm import sessionmaker
+from app.models import Course
+from app.schemas import CourseCreate
+from app.crud import get_course, get_courses, create_course, delete_course
+
+@pytest.fixture
+def fake_db_session():
+    class FakeSession:
+        def __init__(self):
+            self.data = []
+
+        async def add(self, instance):
+            self.data.append(instance)
+
+        async def commit(self):
+            pass
+
+        async def refresh(self, instance):
+            pass
+
+        class Result:
+            def __init__(self, data):
+                self.data = data
+
+            def scalars(self):
+                return self
+
+            def first(self):
+                return self.data[0] if self.data else None
+
+            def all(self):
+                return self.data
+
+        async def execute(self, query):
+            print(f"Executing query: {query}")
+            if hasattr(query, 'column_descriptions'):
+                model = query.column_descriptions[0]['entity']
+                if model == Course:
+                    condition = query.whereclause
+                    if isinstance(condition, BinaryExpression):
+                        column = condition.left.name
+                        value = condition.right.value if hasattr(condition.right, 'value') else condition.right
+                        print(f"Filtering on column: {column} with value: {value}")
+                        filtered_data = [row for row in self.data if getattr(row, column) == value]
+                        print(f"Filtered data: {filtered_data}")
+                        return self.Result(filtered_data)
+                    all_data = [row for row in self.data if isinstance(row, Course)]
+                    print(f"Returning all data: {all_data}")
+                    return self.Result(all_data)
+            return self.Result([])
+
+        async def delete(self, instance):
+            self.data.remove(instance)
+
+    return FakeSession()
+
+@pytest.mark.asyncio
+async def test_create_course(fake_db_session: AsyncSession):
+    course_create = CourseCreate(name="Test Course", description="Test Description")
+    course = await create_course(fake_db_session, course_create)
+    assert course.name == "Test Course"
+    assert course.description == "Test Description"
+
+@pytest.mark.asyncio
+async def test_get_course(fake_db_session: AsyncSession):
+    course_create = CourseCreate(name="Test Course", description="Test Description")
+    course = await create_course(fake_db_session, course_create)
+    result = await get_course(fake_db_session, course.id)
+    assert result == course
+
+@pytest.mark.asyncio
+async def test_get_courses(fake_db_session: AsyncSession):
+    course_create1 = CourseCreate(name="Course 1", description="Description 1")
+    course_create2 = CourseCreate(name="Course 2", description="Description 2")
+    await create_course(fake_db_session, course_create1)
+    await create_course(fake_db_session, course_create2)
+    result = await get_courses(fake_db_session, 0, 10)
+    assert len(result) == 2
+
+@pytest.mark.asyncio
+async def test_delete_course(fake_db_session: AsyncSession):
+    course_create = CourseCreate(name="Course to Delete", description="Delete Description")
+    course = await create_course(fake_db_session, course_create)
+    await delete_course(fake_db_session, course.id)
+    result = await get_course(fake_db_session, course.id)
+    assert result is None
